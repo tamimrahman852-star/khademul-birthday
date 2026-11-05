@@ -54,7 +54,13 @@ textarea,input[type=text]{width:100%;background:rgba(0,0,0,.4);border:1px solid 
 #music{position:fixed;right:14px;bottom:14px;z-index:60;width:52px;height:52px;border-radius:50%;font-size:1.25rem;padding:0}
 #music.pulse{animation:pl 1.6s infinite}@keyframes pl{50%{box-shadow:0 0 0 12px #d4af3722}}
 .foot{padding:40px 0 70px;opacity:.7;font-size:.85rem}
+select.sel{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(212,175,55,.35);border-radius:3px;color:var(--ink);padding:12px;font:inherit;margin-bottom:10px}
+#wm{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(5,3,8,.85);padding:18px}#wm.on{display:flex}
+#wm .card{max-width:520px;width:100%;padding:34px 24px;text-align:center;background:#120c18}
+#wmM{line-height:1.9;margin:14px 0;font-family:'Noto Serif Bengali','Playfair Display',serif}
+.frame{touch-action:pan-y}
 </style></head><body>
+<div id="wm"><div class="card"><p class="ey">A birthday wish</p><h3 class="script gold" id="wmT" style="font-size:2.4rem;font-weight:400;margin:8px 0"></h3><p id="wmM"></p><p class="gold" id="wmF" style="font-size:1.1rem"></p><p style="margin-top:20px"><button class="btn" id="wmX">Thank you 💛</button></p></div></div>
 <canvas id="fx"></canvas><div id="stars"></div><div id="balloons"></div>
 <button class="btn pulse" id="music" title="Music">♪</button>
 
@@ -63,6 +69,7 @@ textarea,input[type=text]{width:100%;background:rgba(0,0,0,.4);border:1px solid 
   <h1 class="script gold big" id="title"></h1>
   <div id="cd"></div>
   <button class="btn alt" id="skip">Begin the celebration</button>
+  <p style="margin-top:16px"><button class="btn" id="openW" style="display:none">💌 Open the wish sent to you</button></p>
 </section>
 
 <section id="party">
@@ -78,7 +85,7 @@ textarea,input[type=text]{width:100%;background:rgba(0,0,0,.4);border:1px solid 
 <section id="mem">
   <p class="ey">Our memories</p><h2 class="script gold" style="font-size:3rem">Golden Moments</h2>
   <div class="frame"><img id="ph" alt="memory"></div>
-  <div class="dots" id="dots"></div><br>
+  <div class="dots" id="dots"></div><p class="sub" id="cap" style="margin:8px 0;font-size:.8rem"></p>
   <button class="btn alt" id="prev">‹</button> <button class="btn alt" id="next">›</button>
   <p class="sub" id="phHint" style="font-size:.8rem"></p>
 </section>
@@ -89,10 +96,13 @@ textarea,input[type=text]{width:100%;background:rgba(0,0,0,.4);border:1px solid 
   <div class="card wc rv"><h3 class="gold">প্রিয় ফাতেমা তুজ জোহরা,</h3><p id="w2"></p></div>
   <div class="card wc rv" style="text-align:center"><h3 class="gold">দুই তারার জন্য ✨</h3><p id="w3"></p><p style="margin-top:14px" class="gold script" id="from" style="font-size:2rem"></p></div>
   <div class="card rv" style="padding:24px;margin-top:30px">
-    <p class="ey" style="margin-bottom:12px">Leave your own wish</p>
+    <p class="ey" style="margin-bottom:6px">Send a personal wish 💌</p>
+    <p class="sub" style="font-size:.85rem;margin:0 0 14px">Write your wish, then share the link — they open it and see your message here.</p>
+    <select id="me" class="sel"><option value="k">I am Khademul → wish Fatema</option><option value="f">I am Fatema → wish Khademul</option><option value="x" selected>I am a friend → wish both</option></select>
     <input type="text" id="who" placeholder="Your name" maxlength="30">
-    <textarea id="msg" rows="3" placeholder="Write a wish…" maxlength="300"></textarea>
-    <button class="btn" id="send">Send wish</button>
+    <textarea id="msg" rows="4" placeholder="Write your heartfelt wish…" maxlength="400"></textarea>
+    <button class="btn" id="send">Share my wish</button> <button class="btn alt" id="wa">WhatsApp</button>
+    <p class="sub" id="shNote" style="font-size:.8rem;margin:12px 0 0"></p>
   </div>
   <div id="wall"></div>
   <p class="foot">Made with ♥ by Tamim Rahman</p>
@@ -129,12 +139,11 @@ function tick() {
   const d = target - Date.now(); if (d <= 0) return celebrate();
   [Math.floor(d / 864e5), Math.floor(d / 36e5) % 24, Math.floor(d / 6e4) % 60, Math.floor(d / 1e3) % 60].forEach((v, i) => boxes[i].textContent = String(v).padStart(2, '0'));
 }
-setInterval(tick, 250); tick();
 $('#skip').onclick = () => { celebrate(); startMusic(); };
 function celebrate() {
   if (on) return; on = true; $('#hero').style.display = 'none';
   ['party', 'mem', 'wsec'].forEach(id => $('#' + id).style.display = 'block'); scrollTo(0, 0); show(0); observe();
-  let n = 0; const iv = setInterval(() => { firework(Math.random() * innerWidth, Math.random() * innerHeight * .5); if (++n > 18) clearInterval(iv); }, 500); confetti(70);
+  let n = 0; const iv = setInterval(() => { firework(Math.random() * innerWidth, Math.random() * innerHeight * .5); if (++n > 18) clearInterval(iv); }, 500); confetti(70); setTimeout(() => rw && openW(), 1800);
 }
 function observe() { const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('in')), { threshold: .15 }); document.querySelectorAll('.rv').forEach(el => io.observe(el)); }
 
@@ -163,7 +172,7 @@ $('#relight').onclick = () => { cake.classList.remove('out'); $('#relight').styl
 /* gallery: auto-loads photo1..photo12 (jpg/jpeg/png/webp) from the repo root */
 const mk = (a, b) => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="400" height="400" fill="url(#g)"/><text x="200" y="250" font-size="140" text-anchor="middle" fill="#fff8ea">✦</text></svg>`);
 let pics = [mk('#b8860b', '#3a2410'), mk('#c9708a', '#2b1a3a'), mk('#d4af37', '#2b1a3a')], cur = 0, real = false;
-function show(i) { cur = (i + pics.length) % pics.length; $('#ph').src = pics[cur]; $('#dots').innerHTML = pics.map((_, k) => `<i class="${k === cur ? 'on' : ''}" data-k="${k}"></i>`).join(''); }
+function show(i) { cur = (i + pics.length) % pics.length; $('#ph').src = pics[cur]; $('#ph').style.objectPosition = /photo1\./.test(pics[cur]) ? '50% 25%' : '50% 50%'; $('#cap').textContent = real ? `Memory ${cur + 1} / ${pics.length}` : ''; $('#dots').innerHTML = pics.map((_, k) => `<i class="${k === cur ? 'on' : ''}" data-k="${k}"></i>`).join(''); }
 $('#dots').onclick = e => e.target.dataset.k && show(+e.target.dataset.k);
 $('#prev').onclick = () => show(cur - 1); $('#next').onclick = () => show(cur + 1);
 setInterval(() => { if (on) show(cur + 1); }, 4200);
@@ -177,8 +186,23 @@ const tryImg = s => new Promise(r => { const i = new Image(); i.onload = () => r
 /* wishes from visitors (stored on this device only) */
 let wishes = []; try { wishes = JSON.parse(localStorage.bdWishes || '[]'); } catch (e) {}
 function draw() { $('#wall').innerHTML = ''; wishes.slice().reverse().forEach(w => { const d = document.createElement('div'); d.className = 'card wish'; const b = document.createElement('b'), p = document.createElement('p'); b.textContent = w.n; p.textContent = w.m; d.append(b, p); $('#wall').appendChild(d); }); }
-$('#send').onclick = () => { const m = $('#msg').value.trim(); if (!m) return; wishes.push({ n: $('#who').value.trim() || 'Friend', m }); try { localStorage.bdWishes = JSON.stringify(wishes.slice(-50)); } catch (e) {} $('#msg').value = ''; draw(); confetti(50); };
 draw();
+var rw = null;
+try { const pw = q.get('w'); if (pw) rw = JSON.parse(decodeURIComponent(escape(atob(pw)))); } catch (e) {}
+const me = () => $('#me').value, who = () => me() === 'k' ? CFG.names[0] : me() === 'f' ? CFG.names[1] : ($('#who').value.trim() || 'A friend'), toN = () => me() === 'k' ? CFG.names[1] : me() === 'f' ? CFG.names[0] : NAMES;
+$('#me').onchange = () => { $('#who').style.display = me() === 'x' ? 'block' : 'none'; };
+function wishLink() { const m = $('#msg').value.trim(); if (!m) { $('#shNote').textContent = 'Please write your wish first 💛'; return null; } const d = btoa(unescape(encodeURIComponent(JSON.stringify({ f: who(), t: toN(), m })))); return { m, url: location.href.split(/[?#]/)[0] + '?w=' + encodeURIComponent(d) }; }
+$('#send').onclick = async () => {
+  const w = wishLink(); if (!w) return;
+  wishes.push({ n: who() + ' → ' + toN(), m: w.m }); try { localStorage.bdWishes = JSON.stringify(wishes.slice(-50)); } catch (e) {} draw(); confetti(60);
+  try { if (navigator.share) { await navigator.share({ title: 'Birthday wish 💌', text: `💌 ${who()} sent a birthday wish to ${toN()}!`, url: w.url }); return; } } catch (e) { return; }
+  try { await navigator.clipboard.writeText(w.url); $('#shNote').textContent = 'Link copied! Send it to ' + toN() + ' 💛'; } catch (e) { prompt('Copy this link and send it:', w.url); }
+};
+$('#wa').onclick = () => { const w = wishLink(); if (!w) return; open('https://wa.me/?text=' + encodeURIComponent(`💌 ${who()} sent a birthday wish to ${toN()}:\n${w.url}`), '_blank'); };
+function openW() { if (!rw) return; $('#wmT').textContent = 'A wish for ' + String(rw.t || 'you').slice(0, 60); $('#wmM').textContent = String(rw.m || '').slice(0, 400); $('#wmF').textContent = '— ' + String(rw.f || 'a friend').slice(0, 40); $('#wm').classList.add('on'); confetti(80); }
+$('#wmX').onclick = () => $('#wm').classList.remove('on');
+$('#openW').onclick = openW; if (rw) $('#openW').style.display = 'inline-block';
+let tx = 0; const fr = document.querySelector('.frame'); fr.ontouchstart = e => { tx = e.touches[0].clientX; }; fr.ontouchend = e => { const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 40) show(cur + (d < 0 ? 1 : -1)); };
 
 /* music: your file (music.mp3) if present, else a built-in Happy Birthday tune */
 const bgm = new Audio(CFG.music); bgm.loop = true; bgm.volume = .8; let fileOK = true, playing = false, ac, master, tm;
@@ -192,4 +216,5 @@ function startMusic() { if (playing) return; playing = true; $('#music').textCon
 function stopMusic() { playing = false; $('#music').textContent = '♪'; bgm.pause(); clearTimeout(tm); if (master) master.disconnect(); }
 $('#music').onclick = () => playing ? stopMusic() : startMusic();
 function cheer() { try { init(); [523, 659, 784, 1047].forEach((f, i) => note(f, ac.currentTime + i * .09, .5, ac.destination)); } catch (e) {} }
+setInterval(tick, 250); tick(); /* last, so every const/let above is initialised */
 </script></body></html>
