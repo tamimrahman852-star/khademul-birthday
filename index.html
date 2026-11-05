@@ -44,7 +44,7 @@ h2{font-weight:400;font-size:clamp(1.5rem,5vw,2.1rem);margin-bottom:6px}
 .out .fl{display:none}.out .candle:after{content:"";position:absolute;left:2px;top:-30px;width:4px;height:30px;background:linear-gradient(#fff8,transparent);animation:sm 2s forwards}
 @keyframes sm{to{transform:translateY(-40px);opacity:0}}
 .frame{width:min(78vw,320px);aspect-ratio:1;border-radius:50%;margin:24px auto;padding:7px;background:conic-gradient(#b8860b,#f6e3a1,#d4af37,#fff3c4,#b8860b);box-shadow:0 0 40px rgba(212,175,55,.45),0 0 90px rgba(232,160,180,.2)}
-.frame img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:#111;border:4px solid #09060d;transition:opacity .5s}
+.frame img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 25%;display:block;background:#111;border:4px solid #09060d;transition:opacity .5s}
 .dots i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#d4af3744;margin:0 4px;cursor:pointer}.dots i.on{background:var(--g);box-shadow:0 0 10px var(--g)}
 .wc{padding:34px 24px;margin:26px 0;text-align:left;font-family:'Noto Serif Bengali','Playfair Display',serif;line-height:2}
 .wc h3{font-family:'Great Vibes',cursive;font-weight:400;font-size:2.2rem;margin-bottom:6px;text-align:center}
@@ -171,7 +171,7 @@ const tryImg = s => new Promise(r => { const i = new Image(); i.onload = () => r
 (async () => {
   let f = [...CFG.photos];
   if (!f.length) for (let n = 1; n <= 12; n++) { const r = await Promise.all(['jpg', 'jpeg', 'png', 'webp'].map(e => tryImg(`photo${n}.${e}`))); const h = r.find(Boolean); if (h) f.push(h); }
-  if (f.length) { pics = f; real = true; show(0); } else $('#phHint').textContent = 'Upload photo1.jpg, photo2.jpg … to the repo root to see them here.';
+  if (f.length) { pics = f; real = true; show(0); if (f.length < 2) ['#prev', '#next', '#dots'].forEach(x => $(x).style.display = 'none'); } else $('#phHint').textContent = 'Upload photo1.jpg, photo2.jpg … to the repo root to see them here.';
 })();
 
 /* wishes from visitors (stored on this device only) */
